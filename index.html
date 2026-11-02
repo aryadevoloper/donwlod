@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Arya Game Store</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#00875a;
+  --green-hover:#006b47;
+  --text:#202124;
+  --text-secondary:#5f6368;
+  --muted:#80868b;
+  --line:#dadce0;
+  --line-soft:#f1f3f4;
+  --surface:#fff;
+  --surface-hover:#f8f9fa;
+  --star:#1a73e8;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--surface);color:var(--text);line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:85px; /* Ruang untuk footer fixed */
+}
+
+/* ============ Topbar (Logo + Search) ============ */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:16px;
+  padding:12px 20px;background:rgba(255,255,255,.95);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-soft);
+}
+.logo{
+  flex-shrink:0;
+  font-size:20px;font-weight:700;color:var(--text);
+  text-decoration:none;letter-spacing:-.02em;
+}
+.logo span{color:var(--green)}
+
+/* Search di Header */
+.header-search{
+  position:relative;
+  flex:1;max-width:360px;
+  display:flex;align-items:center;
+}
+.header-search input{
+  width:100%;height:42px;
+  padding:0 36px 0 42px;
+  border:1px solid transparent;border-radius:999px;
+  background:var(--line-soft);
+  font:inherit;font-size:14.5px;outline:none;
+  transition:background .15s,box-shadow .15s,border-color .15s;
+}
+.header-search input:focus{
+  background:#fff;
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(0,135,90,.15);
+}
+.header-search svg.search-icon{
+  position:absolute;left:14px;color:var(--muted);
+  pointer-events:none;
+}
+.header-search .clear-btn{
+  position:absolute;right:8px;
+  width:28px;height:28px;border-radius:50%;
+  border:0;background:var(--line);color:var(--text-secondary);
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.header-search.has-value .clear-btn{display:flex}
+
+/* ============ Layout ============ */
+main{
+  max-width:680px;margin:0 auto;padding:20px 16px 40px;
+  min-height:calc(100vh - 150px);
+}
+.view{display:none;animation:fadeIn .3s var(--ease)}
+.view.active{display:block}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:none}
+}
+
+.section-title{
+  font-size:18px;font-weight:700;margin-bottom:12px;
+  color:var(--text);
+}
+
+/* ============ List Game (Play Store Style) ============ */
+.game-list{display:flex;flex-direction:column;gap:4px}
+.game-item{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:12px 8px;border-radius:12px;
+  cursor:pointer;transition:background .15s;
+}
+.game-item:hover{background:var(--surface-hover)}
+.game-icon{
+  width:72px;height:72px;border-radius:16px;
+  object-fit:cover;border:1px solid rgba(0,0,0,.05);
+  flex-shrink:0;
+}
+.game-info{flex:1;min-width:0;padding-top:2px}
+.game-title{
+  font-size:15px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.game-category{
+  font-size:13px;color:var(--text-secondary);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.game-meta{
+  display:flex;align-items:center;gap:8px;margin-top:6px;
+  font-size:13px;color:var(--text-secondary);
+}
+.rating-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--line-soft);padding:2px 6px;border-radius:6px;
+  font-weight:500;color:var(--text);
+}
+.rating-badge svg{color:var(--star);width:12px;height:12px}
+
+/* ============ Empty State ============ */
+.empty{padding:40px;text-align:center;color:var(--muted)}
+
+/* ============ Detail Page ============ */
+.back{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px 8px 10px;
+  background:var(--surface);color:var(--text);
+  border:1px solid var(--line-soft);border-radius:999px;
+  font:inherit;font-size:14px;font-weight:500;
+  cursor:pointer;margin-bottom:16px;
+  text-decoration:none;
+}
+.back:hover{background:var(--surface-hover)}
+
+.hero-banner{
+  width:100%;aspect-ratio:16/9;border-radius:18px;
+  overflow:hidden;background:var(--line-soft);
+  margin-bottom:16px;
+}
+.hero-banner img{width:100%;height:100%;object-fit:cover}
+
+.hero-head{display:flex;gap:16px;align-items:center;margin-bottom:20px}
+.hero-icon{
+  width:80px;height:80px;border-radius:18px;
+  object-fit:cover;border:2px solid #fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.hero-title{flex:1;min-width:0}
+.hero-title h1{font-size:22px;font-weight:700;line-height:1.3}
+.hero-title .dev{color:var(--green);font-size:14px;font-weight:600;margin-top:2px}
+
+.detail-stats{
+  display:flex;justify-content:space-around;align-items:center;
+  padding:16px 0;margin-bottom:20px;
+  border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft);
+}
+.stat{text-align:center}
+.stat-val{
+  font-size:15px;font-weight:600;display:flex;align-items:center;
+  justify-content:center;gap:4px;margin-bottom:4px;
+}
+.stat-val svg{color:var(--star);width:14px;height:14px}
+.stat-lbl{font-size:12px;color:var(--text-secondary);text-transform:uppercase}
+
+/* Tombol Instal/Unduh sebagai <a> */
+.btn-install{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;padding:14px;
+  background:var(--green);color:#fff;
+  border:none;border-radius:12px;
+  font-size:16px;font-weight:600;
+  cursor:pointer;margin-bottom:24px;
+  text-decoration:none; /* Penting untuk tag <a> */
+  transition:background .15s;
+}
+.btn-install:hover{background:var(--green-hover)}
+.btn-install:active{transform:scale(.99)}
+
+.about-title{font-size:16px;font-weight:600;margin-bottom:8px}
+.about-desc{color:var(--text-secondary);font-size:14.5px;line-height:1.6}
+
+/* ============ Static Pages (Tentang, dll) ============ */
+.static-content{max-width:600px}
+.static-content h1{font-size:24px;font-weight:700;margin-bottom:16px}
+.static-content h3{font-size:16px;font-weight:600;margin:20px 0 8px}
+.static-content p{color:var(--text-secondary);font-size:14.5px;line-height:1.7;margin-bottom:12px}
+.static-content a{color:var(--green);text-decoration:none;font-weight:500}
+.static-content a:hover{text-decoration:underline}
+.contact-item{
+  padding:16px;background:var(--surface-hover);border-radius:12px;
+  margin-bottom:12px;border:1px solid var(--line-soft);
+}
+.contact-item .label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+
+/* ============ Footer Fixed (Hitam) ============ */
+footer{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:#111;color:#fff;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  text-align:center;
+  box-shadow:0 -2px 10px rgba(0,0,0,.1);
+}
+.footer-links{
+  display:flex;justify-content:center;align-items:center;
+  gap:0 16px;margin-bottom:6px;
+  flex-wrap:nowrap;
+}
+.footer-links a{
+  color:#e8eaed;font-size:13px;text-decoration:none;font-weight:500;
+  white-space:nowrap;padding:4px 0;
+}
+.footer-links a:hover{color:#fff;text-decoration:underline}
+.copyright{font-size:11.5px;color:#9aa0a6}
+
+/* ============ Mobile ============ */
+@media(max-width:560px){
+  .topbar{padding:10px 14px;gap:12px}
+  .logo{font-size:18px}
+  .header-search{max-width:none}
+  .header-search input{height:38px;font-size:13.5px;padding-left:36px}
+  .header-search svg.search-icon{left:12px;width:18px;height:18px}
+  main{padding:16px 12px 40px}
+  .game-item{padding:10px 4px;gap:14px}
+  .game-icon{width:64px;height:64px;border-radius:14px}
+  .game-title{font-size:14px}
+  .game-category{font-size:12px}
+  .hero-icon{width:64px;height:64px}
+  .hero-title h1{font-size:19px}
+  footer{padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+  .footer-links{gap:0 12px;margin-bottom:4px}
+  .footer-links a{font-size:12px}
+  .copyright{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="topbar">
+  <a href="#" class="logo" onclick="goHome(event)">Arya<span>Game</span></a>
+  
+  <div class="header-search" id="searchWrap">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="searchInput" type="text" placeholder="Telusuri game" autocomplete="off" oninput="filterGames(this.value)">
+    <button class="clear-btn" onclick="clearSearch()" aria-label="Hapus">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ HOME ============ -->
+  <section class="view active" id="homeView">
+    <h2 class="section-title" id="sectionTitle">Disarankan untuk Anda</h2>
+    <div class="game-list" id="gameList"></div>
+    <div class="empty" id="emptyState" style="display:none;">Game tidak ditemukan.</div>
+  </section>
+
+  <!-- ============ DETAIL ============ -->
+  <section class="view" id="detailView">
+    <div id="detailContent"></div>
+  </section>
+
+  <!-- ============ STATIC PAGES ============ -->
+  <section class="view" id="staticView">
+    <div id="staticContent" class="static-content"></div>
+  </section>
+</main>
+
+<!-- ============ FOOTER FIXED ============ -->
+<footer>
+  <div class="footer-links">
+    <a href="#about">Tentang</a>
+    <a href="#terms">Ketentuan</a>
+    <a href="#privacy">Privasi</a>
+    <a href="#kontak">Kontak</a>
+  </div>
+  <p class="copyright">© 2026 Adfaya Fathin Arya</p>
+</footer>
+
+<script>
+"use strict";
+
+// ============================================================
+// DATA GAME
+// Ganti "download" dengan link MediaFire milikmu.
+// ============================================================
+const config = [
+  {
+    name: "Arya Escape: Road Fury",
+    developer: "Adfaya Fathin Arya Studio",
+    size: "11,44 MB",
+    rating: 4.5,
+    category: "Petualangan • Balapan • Kasual",
+    icon: "https://files.catbox.moe/lqj3fe.png",
+    banner: "https://files.catbox.moe/hl5j3e.png",
+    download: "https://www.mediafire.com/file/1g12ieri5542hfj/arya-escape.apk/file", 
+    description: "Game kejar-kejaran yang seru. Jelajahi jalanan menantang, kumpulkan koin, dan buka kendaraan baru sepanjang pelarian."
+  },
+  {
+    name: "THE HOLLOW: 10 KEYS",
+    developer: "Adfaya Fathin Arya Studio",
+    size: "10 MB",
+    rating: 4.8,
+    category: "Horror • Survival • First-Person",
+    icon: "https://h.uguu.se/GJqHEdFD.png",
+    banner: "https://h.uguu.se/tpPvxOef.png",
+    download: "https://www.mediafire.com/file/yyyyyy/the-hollow-10-keys.apk/file",
+    description: "Jelajahi tempat misterius, hindari kejaran hantu, dan temukan 10 kunci untuk melarikan diri. Bertahanlah dalam pengalaman horror first-person yang penuh ketegangan."
+  }
+];
+
+// ============================================================
+// HALAMAN STATIS
+// ============================================================
+const pages = {
+  about: {
+    title: "Tentang Arya Game",
+    html: `
+      <p><strong>Arya Game</strong> adalah toko game digital yang menyediakan game gratis buatan <strong>Adfaya Fathin Arya Studio</strong>. Semua game di sini dikembangkan secara independen dan bisa diunduh langsung tanpa biaya.</p>
+      <h3>Misi kami</h3>
+      <p>Menghadirkan game ringan, seru, dan mudah dimainkan untuk semua kalangan — tanpa iklan mengganggu dan tanpa biaya tersembunyi.</p>
+      <h3>Developer</h3>
+      <p>Adfaya Fathin Arya Studio adalah studio indie yang berfokus pada game kasual dengan gameplay sederhana namun menghibur. Kunjungi profil kami di <a href="https://adfayafathinarya.my.id" target="_blank">adfayafathinarya.my.id</a>.</p>
+    `
+  },
+  terms: {
+    title: "Ketentuan Layanan",
+    html: `
+      <p>Dengan menggunakan Arya Game, kamu menyetujui ketentuan berikut.</p>
+      <h3>1. Penggunaan</h3>
+      <p>Semua game disediakan untuk penggunaan pribadi dan non-komersial. Dilarang memperjualbelikan atau mendistribusikan ulang tanpa izin.</p>
+      <h3>2. Hak Cipta</h3>
+      <p>Seluruh aset visual, audio, dan kode sumber adalah milik <strong>Adfaya Fathin Arya Studio</strong> dan dilindungi hukum hak cipta.</p>
+      <h3>3. Batasan Tanggung Jawab</h3>
+      <p>Game disediakan "sebagaimana adanya". Kami tidak menjamin bebas dari bug atau gangguan teknis.</p>
+    `
+  },
+  privacy: {
+    title: "Kebijakan Privasi",
+    html: `
+      <p>Privasi kamu penting bagi kami.</p>
+      <h3>Data yang Dikumpulkan</h3>
+      <p>Arya Game <strong>tidak</strong> mengumpulkan data pribadi seperti nama, email, atau lokasi. Kami tidak menggunakan cookie pelacak atau analitik pihak ketiga.</p>
+      <h3>Izin Aplikasi</h3>
+      <p>Game mungkin meminta izin penyimpanan hanya untuk menyimpan progres permainan secara lokal di perangkat kamu.</p>
+      <h3>Keamanan</h3>
+      <p>Karena kami tidak menyimpan data pribadi di server, tidak ada risiko kebocoran data dari pihak kami.</p>
+    `
+  },
+  kontak: {
+    title: "Hubungi Kami",
+    html: `
+      <p>Punya pertanyaan, masukan, atau ingin melaporkan bug? Hubungi kami melalui:</p>
+      
+      <div class="contact-item">
+        <div class="label">Email (Lapor Bug & Umum)</div>
+        <a href="mailto:adfayafathinarya@gmail.com">adfayafathinarya@gmail.com</a>
+      </div>
+      
+      <div class="contact-item">
+        <div class="label">Website Arya Game</div>
+        <a href="https://aryagame.my.id" target="_blank">aryagame.my.id</a>
+      </div>
+
+      <div class="contact-item">
+        <div class="label">Profil Developer</div>
+        <a href="https://adfayafathinarya.my.id" target="_blank">adfayafathinarya.my.id</a>
+      </div>
+
+      <p style="margin-top:20px">Kami biasanya merespons dalam 1–2 hari kerja.</p>
+    `
+  }
+};
+
+// ============================================================
+// FUNGSI RENDER LIST GAME
+// ============================================================
+function renderGames(gamesToRender = config) {
+  const list = document.getElementById('gameList');
+  const empty = document.getElementById('emptyState');
+  const title = document.getElementById('sectionTitle');
+
+  if (gamesToRender.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    title.style.display = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  title.style.display = 'block';
+
+  list.innerHTML = gamesToRender.map(g => {
+    const originalIndex = config.indexOf(g);
+    return `
+      <div class="game-item" onclick="openDetail(${originalIndex})">
+        <img class="game-icon" src="${g.icon}" alt="${g.name}">
+        <div class="game-info">
+          <div class="game-title">${g.name}</div>
+          <div class="game-category">${g.category}</div>
+          <div class="game-meta">
+            <span class="rating-badge">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              ${g.rating}
+            </span>
+            <span>${g.size}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// SEARCH / FILTER
+// ============================================================
+function filterGames(query) {
+  const wrap = document.getElementById('searchWrap');
+  wrap.classList.toggle('has-value', query.length > 0);
+
+  const q = query.toLowerCase();
+  const filtered = config.filter(g => 
+    g.name.toLowerCase().includes(q) || 
+    g.category.toLowerCase().includes(q)
+  );
+  
+  if(!document.getElementById('homeView').classList.contains('active')) {
+    showView('homeView');
+  }
+  
+  renderGames(filtered);
+}
+
+function clearSearch() {
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  filterGames('');
+  input.focus();
+}
+
+// ============================================================
+// NAVIGASI HALAMAN
+// ============================================================
+function showView(viewId) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function goHome(e) {
+  if (e) e.preventDefault();
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchWrap').classList.remove('has-value');
+  renderGames(config);
+  
+  showView('homeView');
+  document.title = "Arya Game Store";
+  
+  if (window.location.hash) {
+    history.replaceState(null, null, ' ');
+  }
+}
+
+// ============================================================
+// DETAIL GAME
+// ============================================================
+function openDetail(index) {
+  const g = config[index];
+  showView('detailView');
+  document.title = `${g.name} — Arya Game`;
+
+  document.getElementById('detailContent').innerHTML = `
+    <button class="back" onclick="goHome()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Kembali
+    </button>
+
+    <div class="hero-banner">
+      <img src="${g.banner}" alt="${g.name}">
+    </div>
+
+    <div class="hero-head">
+      <img class="hero-icon" src="${g.icon}" alt="${g.name}">
+      <div class="hero-title">
+        <h1>${g.name}</h1>
+        <div class="dev">${g.developer}</div>
+      </div>
+    </div>
+
+    <div class="detail-stats">
+      <div class="stat">
+        <div class="stat-val">
+          ${g.rating} <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        </div>
+        <div class="stat-lbl">${Math.floor(g.rating * 100)} rb ulasan</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">${g.size}</div>
+        <div class="stat-lbl">Ukuran</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">10 rb+</div>
+        <div class="stat-lbl">Diunduh</div>
+      </div>
+    </div>
+
+    <!-- TOMBOL UNDUH: Menggunakan tag <a> agar langsung menuju link MediaFire -->
+    <a href="${g.download}" target="_blank" rel="noopener noreferrer" class="btn-install">
+      Unduh
+    </a>
+
+    <h3 class="about-title">Tentang game ini</h3>
+    <p class="about-desc">${g.description}</p>
+  `;
+}
+
+// ============================================================
+// HALAMAN STATIS (Footer)
+// ============================================================
+function openStaticPage(key) {
+  const page = pages[key];
+  if (!page) return;
+  
+  showView('staticView');
+  document.title = `${page.title} — Arya Game`;
+  
+  document.getElementById('staticContent').innerHTML = `
+    <button class="back" onclick="goHome()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Kembali
+    </button>
+    <h1>${page.title}</h1>
+    ${page.html}
+  `;
+}
+
+// ============================================================
+// ROUTING
+// ============================================================
+function handleRoute() {
+  const hash = window.location.hash.slice(1);
+  
+  if (pages[hash]) {
+    openStaticPage(hash);
+  } else if (!document.getElementById('homeView').classList.contains('active')) {
+    goHome();
+  }
+}
+
+window.addEventListener('hashchange', handleRoute);
+
+// Inisialisasi awal
+renderGames();
+handleRoute();
+</script>
+</body>
+</html>
