@@ -18,16 +18,17 @@
   --surface:#fff;
   --surface-hover:#f8f9fa;
   --star:#1a73e8;
+  --ease:cubic-bezier(.2,.8,.2,1);
 }
 
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   background:var(--surface);color:var(--text);line-height:1.5;
   -webkit-font-smoothing:antialiased;
-  padding-bottom:85px; /* Ruang untuk footer fixed */
+  padding-bottom:85px;
 }
 
-/* ============ Topbar (Logo + Search) ============ */
+/* ============ Topbar ============ */
 .topbar{
   position:sticky;top:0;z-index:100;
   display:flex;align-items:center;gap:16px;
@@ -42,7 +43,6 @@ body{
 }
 .logo span{color:var(--green)}
 
-/* Search di Header */
 .header-search{
   position:relative;
   flex:1;max-width:360px;
@@ -92,12 +92,13 @@ main{
   color:var(--text);
 }
 
-/* ============ List Game (Play Store Style) ============ */
+/* ============ List Game ============ */
 .game-list{display:flex;flex-direction:column;gap:4px}
 .game-item{
   display:flex;align-items:flex-start;gap:16px;
   padding:12px 8px;border-radius:12px;
   cursor:pointer;transition:background .15s;
+  text-decoration:none;color:inherit;
 }
 .game-item:hover{background:var(--surface-hover)}
 .game-icon{
@@ -125,10 +126,9 @@ main{
 }
 .rating-badge svg{color:var(--star);width:12px;height:12px}
 
-/* ============ Empty State ============ */
 .empty{padding:40px;text-align:center;color:var(--muted)}
 
-/* ============ Detail Page ============ */
+/* ============ Detail ============ */
 .back{
   display:inline-flex;align-items:center;gap:6px;
   padding:8px 14px 8px 10px;
@@ -171,24 +171,35 @@ main{
 .stat-val svg{color:var(--star);width:14px;height:14px}
 .stat-lbl{font-size:12px;color:var(--text-secondary);text-transform:uppercase}
 
-/* Tombol Instal/Unduh sebagai <a> */
 .btn-install{
   display:flex;align-items:center;justify-content:center;
   width:100%;padding:14px;
   background:var(--green);color:#fff;
   border:none;border-radius:12px;
   font-size:16px;font-weight:600;
-  cursor:pointer;margin-bottom:24px;
-  text-decoration:none; /* Penting untuk tag <a> */
+  cursor:pointer;margin-bottom:12px;
+  text-decoration:none;
   transition:background .15s;
 }
 .btn-install:hover{background:var(--green-hover)}
 .btn-install:active{transform:scale(.99)}
+.btn-install.disabled{background:var(--line);color:var(--text-secondary);cursor:not-allowed;pointer-events:none}
+
+.btn-share{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:12px;
+  background:var(--surface);color:var(--green);
+  border:1px solid var(--line);border-radius:12px;
+  font:inherit;font-size:15px;font-weight:600;
+  cursor:pointer;margin-bottom:24px;
+  transition:background .15s;
+}
+.btn-share:hover{background:var(--surface-hover)}
 
 .about-title{font-size:16px;font-weight:600;margin-bottom:8px}
 .about-desc{color:var(--text-secondary);font-size:14.5px;line-height:1.6}
 
-/* ============ Static Pages (Tentang, dll) ============ */
+/* ============ Static Pages ============ */
 .static-content{max-width:600px}
 .static-content h1{font-size:24px;font-weight:700;margin-bottom:16px}
 .static-content h3{font-size:16px;font-weight:600;margin:20px 0 8px}
@@ -201,7 +212,20 @@ main{
 }
 .contact-item .label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
 
-/* ============ Footer Fixed (Hitam) ============ */
+/* ============ Toast ============ */
+.toast{
+  position:fixed;left:50%;bottom:100px;z-index:200;
+  transform:translateX(-50%) translateY(10px);
+  background:#202124;color:#fff;
+  padding:10px 18px;border-radius:999px;
+  font-size:13.5px;font-weight:500;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;
+  max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============ Footer ============ */
 footer{
   position:fixed;bottom:0;left:0;right:0;z-index:100;
   background:#111;color:#fff;
@@ -246,8 +270,8 @@ footer{
 
 <!-- ============ HEADER ============ -->
 <header class="topbar">
-  <a href="#" class="logo" onclick="goHome(event)">Arya<span>Game</span></a>
-  
+  <a href="./" class="logo" onclick="goHome(event)">Arya<span>Game</span></a>
+
   <div class="header-search" id="searchWrap">
     <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
     <input id="searchInput" type="text" placeholder="Telusuri game" autocomplete="off" oninput="filterGames(this.value)">
@@ -258,25 +282,23 @@ footer{
 </header>
 
 <main>
-  <!-- ============ HOME ============ -->
   <section class="view active" id="homeView">
     <h2 class="section-title" id="sectionTitle">Disarankan untuk Anda</h2>
     <div class="game-list" id="gameList"></div>
     <div class="empty" id="emptyState" style="display:none;">Game tidak ditemukan.</div>
   </section>
 
-  <!-- ============ DETAIL ============ -->
   <section class="view" id="detailView">
     <div id="detailContent"></div>
   </section>
 
-  <!-- ============ STATIC PAGES ============ -->
   <section class="view" id="staticView">
     <div id="staticContent" class="static-content"></div>
   </section>
 </main>
 
-<!-- ============ FOOTER FIXED ============ -->
+<div class="toast" id="toast"></div>
+
 <footer>
   <div class="footer-links">
     <a href="#about">Tentang</a>
@@ -291,11 +313,21 @@ footer{
 "use strict";
 
 // ============================================================
+// DOMAIN UTAMA (dipakai untuk link bagikan)
+// ============================================================
+const SITE_URL = "https://aryagame.my.id";
+
+// ============================================================
 // DATA GAME
-// Ganti "download" dengan link MediaFire milikmu.
+// "slug" = alamat langsung ke halaman game tersebut:
+//   https://aryagame.my.id/#aryakomik
+//   https://aryagame.my.id/#arya-escape
+//   https://aryagame.my.id/#aryamusic
+// Slug harus huruf kecil, tanpa spasi, dan unik.
 // ============================================================
 const config = [
   {
+    slug: "arya-escape",
     name: "Arya Escape: Road Fury",
     developer: "Adfaya Fathin Arya Studio",
     size: "11,44 MB",
@@ -303,20 +335,33 @@ const config = [
     category: "Petualangan • Balapan • Kasual",
     icon: "https://files.catbox.moe/lqj3fe.png",
     banner: "https://files.catbox.moe/hl5j3e.png",
-    download: "https://www.mediafire.com/file/1g12ieri5542hfj/arya-escape.apk/file", 
+    download: "https://www.mediafire.com/file/1g12ieri5542hfj/arya-escape.apk/file",
     description: "Game kejar-kejaran yang seru. Jelajahi jalanan menantang, kumpulkan koin, dan buka kendaraan baru sepanjang pelarian."
   },
-{
-  name: "AryaKomik",
-  developer: "Adfaya Fathin Arya Studio",
-  size: "10,09 MB",
-  rating: 4.8,
-  category: "Komik • Manga • Manhwa",
-  icon: "https://ganga--link--ghhzdp9sv8hk.code.run/i/4g93t3fh",
-  banner: "https://ganga--link--ghhzdp9sv8hk.code.run/i/5h7tc060",
-  download: "https://www.mediafire.com/file/oktvps6j4kldtlt/AryaKomik.apk/file",
-  description: "Baca komik favoritmu dengan mudah melalui AryaKomik. Jelajahi berbagai judul dan chapter dalam satu aplikasi."
-}
+  {
+    slug: "aryakomik",
+    name: "AryaKomik",
+    developer: "Adfaya Fathin Arya Studio",
+    size: "10,09 MB",
+    rating: 4.8,
+    category: "Komik • Manga • Manhwa",
+    icon: "https://ganga--link--ghhzdp9sv8hk.code.run/i/4g93t3fh",
+    banner: "https://ganga--link--ghhzdp9sv8hk.code.run/i/5h7tc060",
+    download: "https://www.mediafire.com/file/oktvps6j4kldtlt/AryaKomik.apk/file",
+    description: "Baca komik favoritmu dengan mudah melalui AryaKomik. Jelajahi berbagai judul dan chapter dalam satu aplikasi."
+  },
+  {
+    slug: "aryamusic",
+    name: "AryaMusic",
+    developer: "Adfaya Fathin Arya Studio",
+    size: "10,69 MB",
+    rating: 4.8,
+    category: "Musik • Audio Player • Streaming",
+    icon: "https://i.ibb.co.com/qLvD53fk/file-00000000091c8211920c6e4db38c0bc3.png",
+    banner: "https://i.ibb.co.com/0Vhvkpzr/file-00000000bd948207b8acec37c3193c74.png",
+    download: "https://www.mediafire.com/file/asgi6iw3nzuzl9g/AryaMusic.apk/file",
+    description: "Nikmati musik favoritmu dengan mudah melalui AryaMusic. Jelajahi berbagai lagu populer, temukan musik terbaru, dan dengarkan playlist favoritmu dalam satu aplikasi."
+  }
 ];
 
 // ============================================================
@@ -361,12 +406,12 @@ const pages = {
     title: "Hubungi Kami",
     html: `
       <p>Punya pertanyaan, masukan, atau ingin melaporkan bug? Hubungi kami melalui:</p>
-      
+
       <div class="contact-item">
         <div class="label">Email (Lapor Bug & Umum)</div>
         <a href="mailto:adfayafathinarya@gmail.com">adfayafathinarya@gmail.com</a>
       </div>
-      
+
       <div class="contact-item">
         <div class="label">Website Arya Game</div>
         <a href="https://aryagame.my.id" target="_blank">aryagame.my.id</a>
@@ -383,7 +428,35 @@ const pages = {
 };
 
 // ============================================================
-// FUNGSI RENDER LIST GAME
+// UTIL
+// ============================================================
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function gameLink(g) {
+  return `${SITE_URL}/#${g.slug}`;
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function clearHash() {
+  if (window.location.hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+}
+
+// ============================================================
+// RENDER LIST GAME
+// Tiap game adalah link <a href="#slug"> sehingga bisa
+// di-copy / dibuka di tab baru.
 // ============================================================
 function renderGames(gamesToRender = config) {
   const list = document.getElementById('gameList');
@@ -400,44 +473,43 @@ function renderGames(gamesToRender = config) {
   empty.style.display = 'none';
   title.style.display = 'block';
 
-  list.innerHTML = gamesToRender.map(g => {
-    const originalIndex = config.indexOf(g);
-    return `
-      <div class="game-item" onclick="openDetail(${originalIndex})">
-        <img class="game-icon" src="${g.icon}" alt="${g.name}">
-        <div class="game-info">
-          <div class="game-title">${g.name}</div>
-          <div class="game-category">${g.category}</div>
-          <div class="game-meta">
-            <span class="rating-badge">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-              ${g.rating}
-            </span>
-            <span>${g.size}</span>
-          </div>
+  list.innerHTML = gamesToRender.map(g => `
+    <a class="game-item" href="#${esc(g.slug)}">
+      <img class="game-icon" src="${esc(g.icon)}" alt="${esc(g.name)}">
+      <div class="game-info">
+        <div class="game-title">${esc(g.name)}</div>
+        <div class="game-category">${esc(g.category)}</div>
+        <div class="game-meta">
+          <span class="rating-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            ${g.rating}
+          </span>
+          <span>${esc(g.size)}</span>
         </div>
       </div>
-    `;
-  }).join('');
+    </a>
+  `).join('');
 }
 
 // ============================================================
-// SEARCH / FILTER
+// SEARCH
 // ============================================================
 function filterGames(query) {
   const wrap = document.getElementById('searchWrap');
   wrap.classList.toggle('has-value', query.length > 0);
 
   const q = query.toLowerCase();
-  const filtered = config.filter(g => 
-    g.name.toLowerCase().includes(q) || 
+  const filtered = config.filter(g =>
+    g.name.toLowerCase().includes(q) ||
     g.category.toLowerCase().includes(q)
   );
-  
-  if(!document.getElementById('homeView').classList.contains('active')) {
+
+  if (!document.getElementById('homeView').classList.contains('active')) {
     showView('homeView');
+    clearHash();
+    document.title = "Arya Game Store";
   }
-  
+
   renderGames(filtered);
 }
 
@@ -449,7 +521,7 @@ function clearSearch() {
 }
 
 // ============================================================
-// NAVIGASI HALAMAN
+// NAVIGASI
 // ============================================================
 function showView(viewId) {
   document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
@@ -462,22 +534,22 @@ function goHome(e) {
   document.getElementById('searchInput').value = '';
   document.getElementById('searchWrap').classList.remove('has-value');
   renderGames(config);
-  
+
   showView('homeView');
   document.title = "Arya Game Store";
-  
-  if (window.location.hash) {
-    history.replaceState(null, null, ' ');
-  }
+  clearHash();
 }
 
 // ============================================================
-// DETAIL GAME
+// DETAIL GAME (dibuka lewat hash: #aryakomik, dst)
 // ============================================================
-function openDetail(index) {
-  const g = config[index];
+function renderDetail(g) {
   showView('detailView');
   document.title = `${g.name} — Arya Game`;
+
+  const downloadBtn = g.download
+    ? `<a href="${esc(g.download)}" target="_blank" rel="noopener noreferrer" class="btn-install">Unduh</a>`
+    : `<span class="btn-install disabled">Segera hadir</span>`;
 
   document.getElementById('detailContent').innerHTML = `
     <button class="back" onclick="goHome()">
@@ -486,14 +558,14 @@ function openDetail(index) {
     </button>
 
     <div class="hero-banner">
-      <img src="${g.banner}" alt="${g.name}">
+      <img src="${esc(g.banner)}" alt="${esc(g.name)}">
     </div>
 
     <div class="hero-head">
-      <img class="hero-icon" src="${g.icon}" alt="${g.name}">
+      <img class="hero-icon" src="${esc(g.icon)}" alt="${esc(g.name)}">
       <div class="hero-title">
-        <h1>${g.name}</h1>
-        <div class="dev">${g.developer}</div>
+        <h1>${esc(g.name)}</h1>
+        <div class="dev">${esc(g.developer)}</div>
       </div>
     </div>
 
@@ -505,7 +577,7 @@ function openDetail(index) {
         <div class="stat-lbl">${Math.floor(g.rating * 100)} rb ulasan</div>
       </div>
       <div class="stat">
-        <div class="stat-val">${g.size}</div>
+        <div class="stat-val">${esc(g.size)}</div>
         <div class="stat-lbl">Ukuran</div>
       </div>
       <div class="stat">
@@ -514,52 +586,99 @@ function openDetail(index) {
       </div>
     </div>
 
-    <!-- TOMBOL UNDUH: Menggunakan tag <a> agar langsung menuju link MediaFire -->
-    <a href="${g.download}" target="_blank" rel="noopener noreferrer" class="btn-install">
-      Unduh
-    </a>
+    ${downloadBtn}
+
+    <button class="btn-share" onclick="shareGame('${esc(g.slug)}')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      Bagikan link
+    </button>
 
     <h3 class="about-title">Tentang game ini</h3>
-    <p class="about-desc">${g.description}</p>
+    <p class="about-desc">${esc(g.description)}</p>
   `;
 }
 
 // ============================================================
-// HALAMAN STATIS (Footer)
+// BAGIKAN LINK: https://aryagame.my.id/#slug
+// ============================================================
+async function shareGame(slug) {
+  const g = config.find(x => x.slug === slug);
+  if (!g) return;
+  const url = gameLink(g);
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: g.name, text: `Unduh ${g.name} di Arya Game`, url });
+      return;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch (err) {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  showToast('Link disalin: ' + url);
+}
+
+// ============================================================
+// HALAMAN STATIS
 // ============================================================
 function openStaticPage(key) {
   const page = pages[key];
   if (!page) return;
-  
+
   showView('staticView');
   document.title = `${page.title} — Arya Game`;
-  
+
   document.getElementById('staticContent').innerHTML = `
     <button class="back" onclick="goHome()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       Kembali
     </button>
-    <h1>${page.title}</h1>
+    <h1>${esc(page.title)}</h1>
     ${page.html}
   `;
 }
 
 // ============================================================
-// ROUTING
+// ROUTING (berdasarkan hash URL)
+//   (kosong)          -> beranda
+//   #aryakomik        -> halaman AryaKomik
+//   #about / #terms.. -> halaman statis
 // ============================================================
 function handleRoute() {
-  const hash = window.location.hash.slice(1);
-  
-  if (pages[hash]) {
+  let hash = "";
+  try { hash = decodeURIComponent(window.location.hash.slice(1)).toLowerCase(); }
+  catch (e) { hash = window.location.hash.slice(1).toLowerCase(); }
+
+  const game = config.find(g => g.slug === hash);
+
+  if (game) {
+    renderDetail(game);
+  } else if (pages[hash]) {
     openStaticPage(hash);
-  } else if (!document.getElementById('homeView').classList.contains('active')) {
-    goHome();
+  } else {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchWrap').classList.remove('has-value');
+    renderGames(config);
+    showView('homeView');
+    document.title = "Arya Game Store";
   }
 }
 
 window.addEventListener('hashchange', handleRoute);
 
-// Inisialisasi awal
+// Inisialisasi: kalau URL sudah berisi #aryakomik, langsung buka halamannya
 renderGames();
 handleRoute();
 </script>
